@@ -1,7 +1,13 @@
+/*
+* Defines several asynchronous functions to interact with the API for managing conversation history 
+* and user information.
+*/
+
 import { chatHistorySampleData } from '../constants/chatHistory'
 
 import { ChatMessage, Conversation, ConversationRequest, CosmosDBHealth, CosmosDBStatus, UserInfo } from './models'
 
+//Posiela POST požiadavku na endpoint /conversation s telom obsahujúcim správy z options.messages
 export async function conversationApi(options: ConversationRequest, abortSignal: AbortSignal): Promise<Response> {
   const response = await fetch('/conversation', {
     method: 'POST',
@@ -17,6 +23,7 @@ export async function conversationApi(options: ConversationRequest, abortSignal:
   return response
 }
 
+//Posiela GET požiadavku na endpoint /.auth/me na získanie informácií o používateľovi.
 export async function getUserInfo(): Promise<UserInfo[]> {
   const response = await fetch('/.auth/me')
   if (!response.ok) {
@@ -28,6 +35,7 @@ export async function getUserInfo(): Promise<UserInfo[]> {
   return payload
 }
 
+//Vracia vzorové dáta histórie chatu.
 // export const fetchChatHistoryInit = async (): Promise<Conversation[] | null> => {
 export const fetchChatHistoryInit = (): Conversation[] | null => {
   // Make initial API call here
@@ -35,6 +43,7 @@ export const fetchChatHistoryInit = (): Conversation[] | null => {
   return chatHistorySampleData
 }
 
+// Posiela GET požiadavku na endpoint /history/list s voliteľným offsetom na získanie zoznamu konverzácií.
 export const historyList = async (offset = 0): Promise<Conversation[] | null> => {
   const response = await fetch(`/history/list?offset=${offset}`, {
     method: 'GET'
@@ -75,6 +84,8 @@ export const historyList = async (offset = 0): Promise<Conversation[] | null> =>
   return response
 }
 
+//Posiela POST požiadavku na endpoint /history/read s telom obsahujúcim ID konverzácie na získanie 
+//správ z danej konverzácie.
 export const historyRead = async (convId: string): Promise<ChatMessage[]> => {
   const response = await fetch('/history/read', {
     method: 'POST',
@@ -112,6 +123,8 @@ export const historyRead = async (convId: string): Promise<ChatMessage[]> => {
   return response
 }
 
+//Posiela POST požiadavku na endpoint /history/generate s telom obsahujúcim správy 
+//a voliteľným ID konverzácie na generovanie histórie.
 export const historyGenerate = async (
   options: ConversationRequest,
   abortSignal: AbortSignal,
@@ -146,6 +159,8 @@ export const historyGenerate = async (
   return response
 }
 
+// Posiela POST požiadavku na endpoint /history/update s telom obsahujúcim ID konverzácie 
+//a správy na aktualizáciu histórie.
 export const historyUpdate = async (messages: ChatMessage[], convId: string): Promise<Response> => {
   const response = await fetch('/history/update', {
     method: 'POST',
@@ -172,6 +187,8 @@ export const historyUpdate = async (messages: ChatMessage[], convId: string): Pr
   return response
 }
 
+
+//Posiela DELETE požiadavku na endpoint /history/delete s telom obsahujúcim ID konverzácie na vymazanie histórie
 export const historyDelete = async (convId: string): Promise<Response> => {
   const response = await fetch('/history/delete', {
     method: 'DELETE',
@@ -197,6 +214,7 @@ export const historyDelete = async (convId: string): Promise<Response> => {
   return response
 }
 
+//Posiela DELETE požiadavku na endpoint /history/delete_all na vymazanie všetkých histórií.
 export const historyDeleteAll = async (): Promise<Response> => {
   const response = await fetch('/history/delete_all', {
     method: 'DELETE',
@@ -220,6 +238,7 @@ export const historyDeleteAll = async (): Promise<Response> => {
   return response
 }
 
+//Posiela POST požiadavku na endpoint /history/clear s telom obsahujúcim ID konverzácie na vymazanie správ z danej konverzácie.
 export const historyClear = async (convId: string): Promise<Response> => {
   const response = await fetch('/history/clear', {
     method: 'POST',
@@ -245,6 +264,7 @@ export const historyClear = async (convId: string): Promise<Response> => {
   return response
 }
 
+//Posiela POST požiadavku na endpoint /history/rename s telom obsahujúcim ID konverzácie a nový názov na premenovanie konverzácie.
 export const historyRename = async (convId: string, title: string): Promise<Response> => {
   const response = await fetch('/history/rename', {
     method: 'POST',
@@ -271,6 +291,8 @@ export const historyRename = async (convId: string, title: string): Promise<Resp
   return response
 }
 
+
+//Posiela GET požiadavku na endpoint /history/ensure na kontrolu stavu CosmosDB.
 export const historyEnsure = async (): Promise<CosmosDBHealth> => {
   const response = await fetch('/history/ensure', {
     method: 'GET'
@@ -313,6 +335,8 @@ export const historyEnsure = async (): Promise<CosmosDBHealth> => {
   return response
 }
 
+
+//Posiela GET požiadavku na endpoint /frontend_settings na získanie nastavení frontend-u.
 export const frontendSettings = async (): Promise<Response | null> => {
   const response = await fetch('/frontend_settings', {
     method: 'GET'
@@ -327,6 +351,8 @@ export const frontendSettings = async (): Promise<Response | null> => {
 
   return response
 }
+
+//Posiela POST požiadavku na endpoint /history/message_feedback s telom obsahujúcim ID správy a spätnú väzbu na zaznamenanie spätnej väzby k správe.
 export const historyMessageFeedback = async (messageId: string, feedback: string): Promise<Response> => {
   const response = await fetch('/history/message_feedback', {
     method: 'POST',
