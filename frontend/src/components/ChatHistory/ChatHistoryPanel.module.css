@@ -1,13 +1,18 @@
+/* Defines styles for the chat history panel component. */
+
+/* Chat history panel container */
 .container {
   max-height: calc(100vh - 100px);
   width: 300px;
 }
 
+/* Sets the content overflow and maximum height for the list. */
 .listContainer {
   overflow: hidden auto;
   max-height: calc(90vh - 105px);
 }
 
+/* Defines styles for individual list items, including padding, rounded corners, cursor, and display. */
 .itemCell {
   max-width: 270px;
   min-height: 32px;
@@ -21,10 +26,12 @@
   display: flex;
 }
 
+/* Sets the background color for the list item when hovered. */
 .itemCell:hover {
   background: #e6e6e6;
 }
 
+/* Defines styles for buttons in list items, including size, margins, background, and alignment. */
 .itemButton {
   display: flex;
   justify-content: center;
@@ -38,15 +45,18 @@
   cursor: pointer;
 }
 
+/* Sets the background color for the button when hovered. */
 .itemButton:hover {
   background-color: #e6e6e6;
 }
 
+/* Sets the margins and width for chat groups. */
 .chatGroup {
   margin: auto 5px;
   width: 100%;
 }
 
+/* Sets the display and alignment for the spinner container. */
 .spinnerContainer {
   display: flex;
   justify-content: center;
@@ -54,10 +64,12 @@
   height: 50px;
 }
 
+/* Sets the width for the chat list. */
 .chatList {
   width: 100%;
 }
 
+/* Defines styles for the chat month, including font size, weight, margins, and padding. */
 .chatMonth {
   font-size: 14px;
   font-weight: 600;
@@ -65,6 +77,7 @@
   padding-left: 15px;
 }
 
+/* Sets the width, text wrap, and display for chat titles. */
 .chatTitle {
   width: 80%;
   overflow: hidden;
@@ -72,6 +85,7 @@
   text-overflow: ellipsis;
 }
 
+/* Sets the width of the container to 100% for small screens. */
 @media (max-width: 480px) {
   .container {
     width: 100%;

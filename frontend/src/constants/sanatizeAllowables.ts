@@ -1,3 +1,7 @@
+/*
+* This file contains the allowed tags and attributes for the sanitizeHtml function in the frontend to prevent XSS attacks.
+*/
+
 export const XSSAllowTags = [
   'iframe',
   'a',

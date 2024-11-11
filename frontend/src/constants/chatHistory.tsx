@@ -1,5 +1,13 @@
+/* 
+* This file contains sample data for the chat history component.
+* Defines and exports sample chat history data as an array of Conversation objects. 
+* This sample data is useful for application testing and development because it provides realistic examples of conversations that can be used to display and manipulate chat history in the application.
+* 
+*/
+
 import { Conversation } from '../api/models'
 
+// Sample chat history data
 export const chatHistorySampleData: Conversation[] = [
   {
     id: '1',

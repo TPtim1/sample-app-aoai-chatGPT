@@ -1,3 +1,12 @@
+/* 
+*  This component is responsible for rendering the chat history list.
+*  It uses the ChatHistoryListItemGroups component to render the chat history list items.
+*  It also uses the AppStateContext to access the chat history state.
+*  The chat history is grouped by month and the most recent conversations are displayed first.
+*  If there is no chat history, a message is displayed to indicate that there is no chat history.
+*  The component is exported and rendered in the ChatHistory component.
+*/
+
 import React, { useContext } from 'react'
 import { Stack, StackItem, Text } from '@fluentui/react'
 
@@ -8,21 +17,25 @@ import { ChatHistoryListItemGroups } from './ChatHistoryListItem'
 
 interface ChatHistoryListProps {}
 
+// Grouped chat history interface to group chat history by month and year and sort by date in descending order within each group of entries 
 export interface GroupedChatHistory {
   month: string
   entries: Conversation[]
 }
 
+// Function to group chat history by month and year and sort by date in descending order within each group of entries
 const groupByMonth = (entries: Conversation[]) => {
   const groups: GroupedChatHistory[] = [{ month: 'Recent', entries: [] }]
   const currentDate = new Date()
 
+  // Iterate through each chat history entry and group by month and year
   entries.forEach(entry => {
     const date = new Date(entry.date)
     const daysDifference = (currentDate.getTime() - date.getTime()) / (1000 * 60 * 60 * 24)
     const monthYear = date.toLocaleString('default', { month: 'long', year: 'numeric' })
     const existingGroup = groups.find(group => group.month === monthYear)
 
+    // Check if the chat history entry is within the last 7 days and group it as 'Recent'
     if (daysDifference <= 7) {
       groups[0].entries.push(entry)
     } else {
@@ -34,6 +47,7 @@ const groupByMonth = (entries: Conversation[]) => {
     }
   })
 
+  // Sort the groups by date in descending order
   groups.sort((a, b) => {
     // Check if either group has no entries and handle it
     if (a.entries.length === 0 && b.entries.length === 0) {
@@ -59,10 +73,13 @@ const groupByMonth = (entries: Conversation[]) => {
   return groups
 }
 
+// ChatHistoryList component to render the chat history list items 
 const ChatHistoryList: React.FC<ChatHistoryListProps> = () => {
+  // Access the chat history state from the AppStateContext 
   const appStateContext = useContext(AppStateContext)
   const chatHistory = appStateContext?.state.chatHistory
 
+  // React hook to update the component when the chat history state changes
   React.useEffect(() => {}, [appStateContext?.state.chatHistory])
 
   let groupedChatHistory
