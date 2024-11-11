@@ -1,4 +1,7 @@
-"""Data Preparation Script for an Azure Cognitive Search Index."""
+"""Data Preparation Script for an Azure Cognitive Search Index.
+
+
+"""
 import argparse
 import dataclasses
 import json
@@ -19,6 +22,7 @@ from data_utils import chunk_directory, chunk_blob_container
 # Configure environment variables  
 load_dotenv() # take environment variables from .env.
 
+# Dictionary mapping language codes to language names
 SUPPORTED_LANGUAGE_CODES = {
     "ar": "Arabic",
     "hy": "Armenian",
@@ -62,7 +66,7 @@ def check_if_search_service_exists(search_service_name: str,
     subscription_id: str,
     resource_group: str,
     credential = None):
-    """_summary_
+    """Checks if an Azure Cognitive Search service instance exists.
 
     Args:
         search_service_name (str): _description_
@@ -72,6 +76,7 @@ def check_if_search_service_exists(search_service_name: str,
     """
     if credential is None:
         raise ValueError("credential cannot be None")
+     # Construct the API URL and headers for checking if the service exists
     url = (
         f"https://management.azure.com/subscriptions/{subscription_id}"
         f"/resourceGroups/{resource_group}/providers/Microsoft.Search/searchServices"
@@ -83,6 +88,7 @@ def check_if_search_service_exists(search_service_name: str,
         "Authorization": f"Bearer {credential.get_token('https://management.azure.com/.default').token}",
     }
 
+    # Send GET request to check service existence
     response = requests.get(url, headers=headers)
     return response.status_code == 200
 
@@ -95,7 +101,7 @@ def create_search_service(
     sku: str = "standard",
     credential = None,
 ):
-    """_summary_
+    """Creates an Azure Cognitive Search service if it does not already exist.
 
     Args:
         search_service_name (str): _description_
@@ -109,6 +115,8 @@ def create_search_service(
     """
     if credential is None:
         raise ValueError("credential cannot be None")
+    
+    # Prepare the API request URL and payload
     url = (
         f"https://management.azure.com/subscriptions/{subscription_id}"
         f"/resourceGroups/{resource_group}/providers/Microsoft.Search/searchServices"
@@ -131,6 +139,7 @@ def create_search_service(
         "Authorization": f"Bearer {credential.get_token('https://management.azure.com/.default').token}",
     }
 
+    # Send PUT request to create the search service
     response = requests.put(url, json=payload, headers=headers)
     if response.status_code != 201:
         raise Exception(
@@ -146,7 +155,29 @@ def create_or_update_search_index(
         language=None,
         vector_config_name=None,
         admin_key=None):
+    """Creates or updates a search index with a specified schema and configuration.
     
+    This function configures the index schema based on the specified parameters, including
+    support for semantic search and vector-based search if enabled.
+    
+    Args:
+        service_name (str): Name of the Azure Search service.
+        subscription_id (str): Azure subscription ID.
+        resource_group (str): Resource group name.
+        index_name (str): Name of the index to create or update.
+        semantic_config_name (str): Semantic search configuration name.
+        credential: Azure credential object for authentication.
+        language (str): Language code for indexing.
+        vector_config_name (str): Name of the vector search configuration.
+        admin_key (str): Admin API key for the search service.
+
+    Raises:
+        Exception: If index creation or update fails.
+    
+    Returns:
+        bool: True if the index is created or updated successfully, False otherwise.
+    """
+    # Fetch admin key if it's not provided
     if credential is None and admin_key is None:
         raise ValueError("credential and admin key cannot be None")
     
@@ -159,12 +190,14 @@ def create_or_update_search_index(
             ).stdout
         )["primaryKey"]
 
+    # API endpoint for creating or updating the index
     url = f"https://{service_name}.search.windows.net/indexes/{index_name}?api-version=2024-03-01-Preview"
     headers = {
         "Content-Type": "application/json",
         "api-key": admin_key,
     }
 
+    # Define index schema based on function parameters
     body = {
         "fields": [
             {
@@ -234,6 +267,7 @@ def create_or_update_search_index(
         },
     }
 
+    # Add vector search configuration if specified
     if vector_config_name:
         body["fields"].append({
             "name": "contentVector",
@@ -266,6 +300,7 @@ def create_or_update_search_index(
         ]
         }
 
+    # Execute the API request to create or update the index
     response = requests.put(url, json=body, headers=headers)
     if response.status_code == 201:
         print(f"Created search index {index_name}")
@@ -278,15 +313,32 @@ def create_or_update_search_index(
 
 
 def upload_documents_to_index(service_name, subscription_id, resource_group, index_name, docs, credential=None, upload_batch_size = 50, admin_key=None):
+    """Uploads a list of documents to the specified Azure Cognitive Search index in batches.
+
+    Args:
+        service_name (str): The name of the Azure Search service.
+        subscription_id (str): Azure subscription ID.
+        resource_group (str): Name of the resource group.
+        index_name (str): Name of the target search index.
+        docs (list): List of documents to be uploaded.
+        credential: Azure credential object for authentication (optional).
+        upload_batch_size (int): Number of documents to upload per batch (default is 50).
+        admin_key (str): Admin API key for the search service (optional).
+
+    Raises:
+        Exception: Raises an error if uploading fails for some documents.
+    """
+    # Ensure either a credential or admin key is provided
     if credential is None and admin_key is None:
         raise ValueError("credential and admin_key cannot be None")
     
     to_upload_dicts = []
 
+    # Add document IDs and prepare documents for upload
     id = 0
     for d in docs:
         if type(d) is not dict:
-            d = dataclasses.asdict(d)
+            d = dataclasses.asdict(d) # Convert dataclass to dictionary if necessary
         # add id to documents
         d.update({"@search.action": "upload", "id": str(id)})
         if "contentVector" in d and d["contentVector"] is None:
@@ -294,7 +346,9 @@ def upload_documents_to_index(service_name, subscription_id, resource_group, ind
         to_upload_dicts.append(d)
         id += 1
     
+    # Get the endpoint URL for the search service
     endpoint = "https://{}.search.windows.net/".format(service_name)
+    # Fetch admin key if it's not provided
     if not admin_key:
         admin_key = json.loads(
             subprocess.run(
@@ -304,6 +358,7 @@ def upload_documents_to_index(service_name, subscription_id, resource_group, ind
             ).stdout
         )["primaryKey"]
 
+    # Initialize SearchClient for interacting with the index
     search_client = SearchClient(
         endpoint=endpoint,
         index_name=index_name,
@@ -315,6 +370,7 @@ def upload_documents_to_index(service_name, subscription_id, resource_group, ind
         results = search_client.upload_documents(documents=batch)
         num_failures = 0
         errors = set()
+        # Check for failed uploads
         for result in results:
             if not result.succeeded:
                 print(f"Indexing Failed for {result.key} with ERROR: {result.error_message}")
@@ -325,7 +381,19 @@ def upload_documents_to_index(service_name, subscription_id, resource_group, ind
                             f"To Debug: PLEASE CHECK chunk_size and upload_batch_size. \n Error Messages: {list(errors)}")
 
 def validate_index(service_name, subscription_id, resource_group, index_name):
+    """Validates the status and content of the search index to ensure data integrity.
+
+    Args:
+        service_name (str): The name of the Azure Search service.
+        subscription_id (str): Azure subscription ID.
+        resource_group (str): Name of the resource group.
+        index_name (str): Name of the target search index.
+
+    Prints:
+        Validation status and statistics of the index.
+    """
     api_version = "2024-03-01-Preview"
+    # Fetch admin key for authentication
     admin_key = json.loads(
         subprocess.run(
             f"az search admin-key show --subscription {subscription_id} --resource-group {resource_group} --service-name {service_name}",
@@ -334,17 +402,20 @@ def validate_index(service_name, subscription_id, resource_group, index_name):
         ).stdout
     )["primaryKey"]
 
+    # Define headers and parameters for the API request
     headers = {
         "Content-Type": "application/json", 
         "api-key": admin_key}
     params = {"api-version": api_version}
     url = f"https://{service_name}.search.windows.net/indexes/{index_name}/stats"
+    # Retry up to 5 times in case the index is initially empty
     for retry_count in range(5):
         response = requests.get(url, headers=headers, params=params)
 
         if response.status_code == 200:
             response = response.json()
             num_chunks = response['documentCount']
+            # Check if index is empty and retry if necessary
             if num_chunks==0 and retry_count < 4:
                 print("Index is empty. Waiting 60 seconds to check again...")
                 time.sleep(60)
@@ -365,6 +436,19 @@ def validate_index(service_name, subscription_id, resource_group, index_name):
             break
 
 def create_index(config, credential, form_recognizer_client=None, embedding_model_endpoint=None, use_layout=False, njobs=4, captioning_model_endpoint=None, captioning_model_key=None):
+    """Main function to set up an Azure Cognitive Search index and upload documents.
+
+    Args:
+        config (dict): Configuration dictionary containing search service details.
+        credential: Azure credential for authentication.
+        form_recognizer_client: Client for form recognition (optional).
+        embedding_model_endpoint (str): Endpoint for embedding model (optional).
+        use_layout (bool): Flag to use layout information for chunking (optional).
+        njobs (int): Number of jobs for parallel processing (default is 4).
+        captioning_model_endpoint (str): Captioning model endpoint (optional).
+        captioning_model_key (str): Captioning model key (optional).
+    """
+     # Extract settings from config
     service_name = config["search_service_name"]
     subscription_id = config["subscription_id"]
     resource_group = config["resource_group"]
@@ -372,6 +456,7 @@ def create_index(config, credential, form_recognizer_client=None, embedding_mode
     index_name = config["index_name"]
     language = config.get("language", None)
 
+    # Verify language suppor
     if language and language not in SUPPORTED_LANGUAGE_CODES:
         raise Exception(f"ERROR: Ingestion does not support {language} documents. "
                         f"Please use one of {SUPPORTED_LANGUAGE_CODES}."
@@ -395,6 +480,7 @@ def create_index(config, credential, form_recognizer_client=None, embedding_mode
     if not create_or_update_search_index(service_name, subscription_id, resource_group, index_name, config["semantic_config_name"], credential, language, vector_config_name=config.get("vector_config_name", None), admin_key=admin_key):
         raise Exception(f"Failed to create or update index {index_name}")
     
+    # Initialize data configurations for uploading
     data_configs = []
     if "data_path" in config:
         data_configs.append({
@@ -404,13 +490,14 @@ def create_index(config, credential, form_recognizer_client=None, embedding_mode
     if "data_paths" in config:
         data_configs.extend(config["data_paths"])
 
+     # Process each data source path
     for data_config in data_configs:
         # chunk directory
         print(f"Chunking path {data_config['path']}...")
         add_embeddings = False
         if config.get("vector_config_name") and embedding_model_endpoint:
             add_embeddings = True
-
+        # Check if path is a blob URL or local path and chunk data accordingly
         if "blob.core" in data_config["path"]:
             result = chunk_blob_container(data_config["path"], credential=credential, num_tokens=config["chunk_size"], token_overlap=config.get("token_overlap",0),
                                 azure_credential=credential, form_recognizer_client=form_recognizer_client, use_layout=use_layout, njobs=njobs,
@@ -448,7 +535,9 @@ def valid_range(n):
     return n
 
 if __name__ == "__main__": 
+    # Initialize the argument parser to handle command-line inputs
     parser = argparse.ArgumentParser()
+    # Define the arguments that can be passed to the script
     parser.add_argument("--config", type=str, help="Path to config file containing settings for data preparation")
     parser.add_argument("--form-rec-resource", type=str, help="Name of your Form Recognizer resource to use for PDF cracking.")
     parser.add_argument("--form-rec-key", type=str, help="Key for your Form Recognizer resource to use for PDF cracking.")
@@ -459,30 +548,40 @@ if __name__ == "__main__":
     parser.add_argument("--search-admin-key", type=str, help="Admin key for the search service. If not provided, will use Azure CLI to get the key.")
     parser.add_argument("--azure-openai-endpoint", type=str, help="Endpoint for the (Azure) OpenAI API. Format: 'https://<AOAI resource name>.openai.azure.com/openai/deployments/<vision model name>/chat/completions?api-version=2024-04-01-preview'")
     parser.add_argument("--azure-openai-key", type=str, help="Key for the (Azure) OpenAI API.")
+    # Parse the arguments provided in the command line
     args = parser.parse_args()
-
+    
+    # Load the configuration from the specified JSON file
     with open(args.config) as f:
         config = json.load(f)
-
+    
+    # Initialize Azure CLI credential and Form Recognizer client (optional)
     credential = AzureCliCredential()
     form_recognizer_client = None
 
+     # Inform the user that the data preparation script has started
     print("Data preparation script started")
+     # If a search admin key is provided via arguments, set it as an environment variable
     if args.search_admin_key:
         os.environ["AZURE_SEARCH_ADMIN_KEY"] = args.search_admin_key
 
+    # If Form Recognizer resource and key are provided, set them as environment variables
     if args.form_rec_resource and args.form_rec_key:
         os.environ["FORM_RECOGNIZER_ENDPOINT"] = f"https://{args.form_rec_resource}.cognitiveservices.azure.com/"
         os.environ["FORM_RECOGNIZER_KEY"] = args.form_rec_key
+        # If njobs is set to 1, initialize the Form Recognizer client (only one job at a time)
         if args.njobs==1:
             form_recognizer_client = DocumentIntelligenceClient(endpoint=f"https://{args.form_rec_resource}.cognitiveservices.azure.com/", credential=AzureKeyCredential(args.form_rec_key))
         print(f"Using Form Recognizer resource {args.form_rec_resource} for PDF cracking, with the {'Layout' if args.form_rec_use_layout else 'Read'} model.")
 
+    # Iterate through each index configuration provided in the config file
     for index_config in config:
+        # Inform the user that data preparation for the index is starting
         print("Preparing data for index:", index_config["index_name"])
+        # Ensure that if vector search is enabled, an embedding model endpoint is provided
         if index_config.get("vector_config_name") and not args.embedding_model_endpoint:
             raise Exception("ERROR: Vector search is enabled in the config, but no embedding model endpoint and key were provided. Please provide these values or disable vector search.")
-    
+        # Call the function to create the index using the provided configurations and arguments
         create_index(index_config, credential, form_recognizer_client, embedding_model_endpoint=args.embedding_model_endpoint, use_layout=args.form_rec_use_layout, njobs=args.njobs, captioning_model_endpoint=args.azure_openai_endpoint, captioning_model_key=args.azure_openai_key)
         print("Data preparation for index", index_config["index_name"], "completed")
 

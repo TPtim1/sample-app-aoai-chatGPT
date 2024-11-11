@@ -1,3 +1,7 @@
+# Python script for document processing. It sets up clients for Azure Document Intelligence 
+# and Key Vault, processes documents from the input directory, chunks them according to 
+# configuration, and saves results to an output file. Supports specifying chunk size, token 
+# overlap, and other options via a configuration file.
 import argparse
 import dataclasses
 import json
@@ -10,6 +14,7 @@ from azure.ai.formrecognizer import DocumentAnalysisClient
 
 from data_utils import chunk_directory
 
+# Function to set up the Document Intelligence client using Azure Key Vault secrets
 def get_document_intelligence_client(config, secret_client):
     print("Setting up Document Intelligence client...")
     secret_name = config.get("document_intelligence_secret_name")
@@ -38,6 +43,7 @@ def get_document_intelligence_client(config, secret_client):
         return None
 
 
+# Main function to parse arguments, load configuration, and chunk documents
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--input_data_path", type=str, required=True)

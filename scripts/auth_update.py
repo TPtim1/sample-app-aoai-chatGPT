@@ -1,9 +1,12 @@
+# Python script to update the redirect URIs for an Azure application registration.
+# Uses the Azure Developer CLI credentials to authenticate and make an API request
+# to update the redirect URIs for the specified application ID.
 import argparse
 
 from azure.identity import AzureDeveloperCliCredential
 import urllib3
 
-
+# Function to update the redirect URIs for a specified application
 def update_redirect_uris(credential, app_id, uri):
     urllib3.request(
         "PATCH",
@@ -22,7 +25,7 @@ def update_redirect_uris(credential, app_id, uri):
         },
     )
 
-
+# Main function to parse arguments and initiate the update process
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Add a redirect URI to a registered application",
