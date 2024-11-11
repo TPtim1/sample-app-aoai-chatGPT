@@ -1,3 +1,13 @@
+/* 
+* This file sets basic styles for the entire project. 
+* Contains:
+*   - Global settings: All elements have box-sizing: border-box, which means that the padding and border are included in the overall width and height of the element.
+*   - Styles for html and body: Sets height to 100%, removes margin and padding, and sets background to light gray.
+*   - Fonts and text smoothing: Defines the list of fonts for the html element and sets the text smoothing for better appearance.
+*   - Styles for #root: Sets the height to 100% to ensure that the app's main container takes up the full height of the page.
+* 
+*/
+
 * {
   box-sizing: border-box;
 }

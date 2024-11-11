@@ -1,11 +1,3 @@
-/*
-* configures the TypeScript compiler for the project. Defines compilation options such as target 
-* JavaScript version (target), used libraries (lib), module system (module), and other settings 
-* that affect compiler behavior. The file also specifies which files are to be included in 
-* the compilation (include) and references to other configuration files (references). 
-* This file is crucial for the proper setup and functioning of TypeScript in the project.
-*/
-
 {
   "compilerOptions": {
     "target": "ESNext",

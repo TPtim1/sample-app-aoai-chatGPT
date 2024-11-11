@@ -1,3 +1,7 @@
+/* Defines styles for buttons in the application. */
+
+/* Sets the width, height, rounded corners, radial gradient background, and padding for the share button. 
+When talking, it changes the background to a linear gradient. */
 .shareButtonRoot {
   width: 86px;
   height: 32px;
@@ -6,10 +10,12 @@
   padding: 5px 12px;
 }
 
+/* When hovering over the share button, it changes the background to a linear gradient. */
 .shareButtonRoot:hover {
   background: linear-gradient(135deg, #0f6cbd 0%, #2d87c3 51.04%, #8dddd8 100%);
 }
 
+/* When clicking the share button, it changes the background to a linear gradient. */
 .shareButtonRoot span {
   font-weight: 600;
   font-size: 14px;
@@ -17,24 +23,29 @@
   color: #ffffff;
 }
 
+/* When clicking the share button, it changes the background to a linear gradient. */
 .shareButtonRoot i,
 .shareButtonRoot:hover i {
   color: #ffffff !important;
 }
 
+/* Sets the width, height, rounded corners, and border for the history button. */
 .historyButtonRoot {
   width: 180px;
   border: 1px solid #d1d1d1;
 }
 
+/* When hovering over the history button, it changes the border to a solid color. */
 .historyButtonRoot:hover {
   border: 1px solid #d1d1d1;
 }
 
+/* When clicking the history button, it changes the border to a solid color. */
 .historyButtonRoot:active {
   border: 1px solid #d1d1d1;
 }
 
+/* Sets the width, height, and padding for the history button. */
 @media (max-width: 480px) {
   .shareButtonRoot {
     width: auto;

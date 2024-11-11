@@ -1,7 +1,15 @@
+/*
+* Defines a reducer function appStateReducer that manages application state based on various actions. 
+* This function updates the state of the application according to the type of action, such as switching chat history, 
+* updating the current chat, loading chat history, setting CosmosDB state, and more, ensuring the correct operation 
+* and interaction of the application.
+*/
+
 import { Action, AppState } from './AppProvider'
 
-// Define the reducer function
+// Define the reducer function appStateReducer that manages application state based on various actions
 export const appStateReducer = (state: AppState, action: Action): AppState => {
+  // Switch statement to handle different types of actions
   switch (action.type) {
     case 'TOGGLE_CHAT_HISTORY':
       return { ...state, isChatHistoryOpen: !state.isChatHistoryOpen }
@@ -10,21 +18,27 @@ export const appStateReducer = (state: AppState, action: Action): AppState => {
     case 'UPDATE_CHAT_HISTORY_LOADING_STATE':
       return { ...state, chatHistoryLoadingState: action.payload }
     case 'UPDATE_CHAT_HISTORY':
+      // If chatHistory or currentChat is not available, return the current state
       if (!state.chatHistory || !state.currentChat) {
         return state
       }
+      // Find the index of the conversation in the chatHistory array
       const conversationIndex = state.chatHistory.findIndex(conv => conv.id === action.payload.id)
+      // If the conversation exists in the chatHistory array, update the chatHistory with the new conversation
       if (conversationIndex !== -1) {
         const updatedChatHistory = [...state.chatHistory]
         updatedChatHistory[conversationIndex] = state.currentChat
         return { ...state, chatHistory: updatedChatHistory }
+      // If the conversation does not exist in the chatHistory array, add the new conversation to the chatHistory
       } else {
         return { ...state, chatHistory: [...state.chatHistory, action.payload] }
       }
     case 'UPDATE_CHAT_TITLE':
+      // If chatHistory is not available, return the current state
       if (!state.chatHistory) {
         return { ...state, chatHistory: [] }
       }
+      // Update the title of the conversation in the chatHistory array
       const updatedChats = state.chatHistory.map(chat => {
         if (chat.id === action.payload.id) {
           if (state.currentChat?.id === action.payload.id) {
@@ -37,6 +51,7 @@ export const appStateReducer = (state: AppState, action: Action): AppState => {
       })
       return { ...state, chatHistory: updatedChats }
     case 'DELETE_CHAT_ENTRY':
+      // If chatHistory is not available, return the current state
       if (!state.chatHistory) {
         return { ...state, chatHistory: [] }
       }
@@ -49,6 +64,7 @@ export const appStateReducer = (state: AppState, action: Action): AppState => {
       return { ...state, chatHistory: [], filteredChatHistory: [], currentChat: null }
     case 'DELETE_CURRENT_CHAT_MESSAGES':
       //TODO: make api call to delete current conversation messages from DB
+      // If currentChat or chatHistory is not available, return the current state
       if (!state.currentChat || !state.chatHistory) {
         return state
       }
@@ -67,6 +83,7 @@ export const appStateReducer = (state: AppState, action: Action): AppState => {
     case 'FETCH_FRONTEND_SETTINGS':
       return { ...state, isLoading: false, frontendSettings: action.payload }
     case 'SET_FEEDBACK_STATE':
+      // Update the feedback state for the answer
       return {
         ...state,
         feedbackState: {
@@ -75,6 +92,7 @@ export const appStateReducer = (state: AppState, action: Action): AppState => {
         }
       }
     case 'SET_ANSWER_EXEC_RESULT':
+      // Update the answer execution result for the answer
       return {
         ...state,
         answerExecResult: {
