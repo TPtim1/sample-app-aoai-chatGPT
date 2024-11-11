@@ -27,10 +27,18 @@ from data_utils import chunk_directory
 
 
 def create_search_index(index_name, index_client):
+    """Creates a search index on Azure Cognitive Search if it does not exist. 
+       Args:
+           index_name (str): The name of the search index to create or update.
+           index_client (SearchIndexClient): The client used to interact with Azure Cognitive Search.
+    """
     print(f"Ensuring search index {index_name} exists")
+     # Check if the index already exists
     if index_name not in index_client.list_index_names():
+        # Define the schema for the index
         index = SearchIndex(
             name=index_name,
+            # Fields that will be indexed
             fields=[
                 SearchableField(name="id", type="Edm.String", key=True),
                 SearchableField(
@@ -46,6 +54,7 @@ def create_search_index(index_name, index_client):
                             hidden=False, searchable=True, filterable=False, sortable=False, facetable=False,
                             vector_search_dimensions=1536, vector_search_configuration="default"),
             ],
+             # Semantic settings to prioritize fields for better search relevance
             semantic_settings=SemanticSettings(
                 configurations=[
                     SemanticConfiguration(
@@ -59,6 +68,7 @@ def create_search_index(index_name, index_client):
                     )
                 ]
             ),
+            # Vector search configuration
             vector_search=VectorSearch(
                 algorithm_configurations=[
                     VectorSearchAlgorithmConfiguration(
@@ -69,16 +79,24 @@ def create_search_index(index_name, index_client):
                 ]
             )
         )
+        # Create the index
         print(f"Creating {index_name} search index")
         index_client.create_index(index)
     else:
         print(f"Search index {index_name} already exists")
 
-
+# Function to upload documents to the Azure Search Index in batches
 def upload_documents_to_index(docs, search_client, upload_batch_size=50):
+    """Uploads documents to an Azure Cognitive Search index in batches.
+       Args:
+           docs (list): List of documents to be indexed, each document as a dictionary.
+           search_client (SearchClient): The client used to upload documents to Azure Cognitive Search.
+           upload_batch_size (int): The number of documents to upload in each batch (default is 50).
+    """
     to_upload_dicts = []
 
     id = 0
+    # Prepare documents for upload
     for document in docs:
         d = dataclasses.asdict(document)
         # add id to documents
@@ -96,6 +114,7 @@ def upload_documents_to_index(docs, search_client, upload_batch_size=50):
         results = search_client.upload_documents(documents=batch)
         num_failures = 0
         errors = set()
+        # Check for failures in uploading documents
         for result in results:
             if not result.succeeded:
                 print(
@@ -103,6 +122,7 @@ def upload_documents_to_index(docs, search_client, upload_batch_size=50):
                 )
                 num_failures += 1
                 errors.add(result.error_message)
+        # Raise an error if any documents failed to upload
         if num_failures > 0:
             raise Exception(
                 f"INDEXING FAILED for {num_failures} documents. Please recreate the index."
@@ -111,9 +131,16 @@ def upload_documents_to_index(docs, search_client, upload_batch_size=50):
 
 
 def validate_index(index_name, index_client):
+    """Validates the status of a search index on Azure Cognitive Search, 
+       ensuring that documents are properly indexed and provides statistics on the index.
+       Args:
+           index_name (str): The name of the index to validate.
+           index_client (SearchIndexClient): The client used to interact with Azure Cognitive Search.
+    """
     for retry_count in range(5):
         stats = index_client.get_index_statistics(index_name)
         num_chunks = stats["document_count"]
+        # If no documents are indexed, retry after 60 seconds
         if num_chunks == 0 and retry_count < 4:
             print("Index is empty. Waiting 60 seconds to check again...")
             time.sleep(60)
@@ -129,6 +156,17 @@ def validate_index(index_name, index_client):
 def create_and_populate_index(
     index_name, index_client, search_client, form_recognizer_client, azure_credential, embedding_endpoint
 ):
+    """Creates or updates a search index, processes document chunks from a directory, 
+       and uploads them to Azure Cognitive Search. 
+       Also validates the index once the upload is completed.
+       Args:
+           index_name (str): The name of the index to create or update.
+           index_client (SearchIndexClient): The client used to create or update the search index.
+           search_client (SearchClient): The client used to upload documents to the search index.
+           form_recognizer_client (DocumentAnalysisClient): The client used for extracting content from documents.
+           azure_credential (AzureDeveloperCliCredential): The Azure credentials for authentication.
+           embedding_endpoint (str): The endpoint for generating embeddings.
+    """
     # create or update search index with compatible schema
     create_search_index(index_name, index_client)
 
@@ -145,6 +183,7 @@ def create_and_populate_index(
         embedding_endpoint=embedding_endpoint
     )
 
+    # If no chunks are found, raise an error
     if len(result.chunks) == 0:
         raise Exception("No chunks found. Please check the data path and chunk size.")
 
@@ -164,10 +203,21 @@ def create_and_populate_index(
 
 
 if __name__ == "__main__":
+    """Main entry point for the script that sets up and executes the document preparation, chunking, and indexing process.
+       Args:
+           --tenantid (str): Optional. Azure tenant ID for authentication.
+           --searchservice (str): Azure Cognitive Search service name.
+           --index (str): The name of the index to create or update.
+           --searchkey (str): Optional. Azure search key for authentication.
+           --formrecognizerservice (str): Optional. Azure Form Recognizer service name.
+           --formrecognizerkey (str): Optional. Azure Form Recognizer key for authentication.
+           --embeddingendpoint (str): Optional. OpenAI endpoint for generating embeddings.
+    """
     parser = argparse.ArgumentParser(
         description="Prepare documents by extracting content from PDFs, splitting content into sections and indexing in a search index.",
         epilog="Example: prepdocs.py --searchservice mysearch --index myindex",
     )
+    # Add command-line arguments for configuration
     parser.add_argument(
         "--tenantid",
         required=False,
@@ -219,9 +269,11 @@ if __name__ == "__main__":
         else AzureKeyCredential(args.formrecognizerkey)
     )
 
+    # Print initialization message
     print("Data preparation script started")
     print("Preparing data for index:", args.index)
     search_endpoint = f"https://{args.searchservice}.search.windows.net/"
+    # Set up clients for Azure services
     index_client = SearchIndexClient(endpoint=search_endpoint, credential=search_creds)
     search_client = SearchClient(
         endpoint=search_endpoint, credential=search_creds, index_name=args.index

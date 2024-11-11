@@ -7,7 +7,7 @@ version: 1
 
 inputs:
   chunks_with_embeddings_file_path:
-    type: uri_file
+    type: uri_file  
   config_file:
     type: uri_file
 

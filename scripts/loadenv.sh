@@ -2,10 +2,12 @@
 if not command -v azd &> /dev/null; then
     echo "azd command not found, skipping .env file load"
 else
+    # If any active environment exists, load environment variables
     if [ -z "$(azd env list | grep -w true | awk '{print $1}')" ]; then
         echo "No azd environments found, skipping .env file load"
     else
         echo "Loading azd .env file from current environment"
+        # Read and export environment variables
         while IFS='=' read -r key value; do
         value=$(echo "$value" | sed 's/^"//' | sed 's/"$//')
         export "$key=$value"
@@ -17,7 +19,7 @@ fi
 
 
 echo 'Creating Python virtual environment ".venv" in root'
-python3 -m venv .venv
+python3 -m venv .venv # Create the Python virtual environment
 
 echo 'Installing dependencies from "requirements.txt" into virtual environment'
-./.venv/bin/python -m pip install -r requirements-dev.txt
+./.venv/bin/python -m pip install -r requirements-dev.txt # Install Python dependencies

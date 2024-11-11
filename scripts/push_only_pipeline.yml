@@ -5,21 +5,21 @@ display_name: push_only_pipeline
 description: Pipeline to push data to ACS.
 
 settings:
-  default_compute: azureml:serverless
+  default_compute: azureml:serverless # Specifies serverless compute for the pipeline
 
 inputs:
   config_file: 
-    type: uri_file
+    type: uri_file  # Configuration file for ACS
     path: aml_config.json # your config file name here
   chunked_file:
-    type: uri_file
+    type: uri_file  
     path: <data asset name>
     mode: ro_mount
 
 jobs:
   push_documents_acs:
     type: command
-    component: ./push_documents_acs.yml
+    component: ./push_documents_acs.yml  # Use the push_documents_acs component
     inputs:
       config_file: ${{parent.inputs.config_file}}
       chunks_with_embeddings_file_path: ${{parent.inputs.chunked_file}}

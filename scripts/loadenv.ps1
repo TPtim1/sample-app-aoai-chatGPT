@@ -20,6 +20,7 @@ if (-not (Get-Command azd -ErrorAction SilentlyContinue)) {
   }
 }
 
+# Check if Python is installed
 $pythonCmd = Get-Command python -ErrorAction SilentlyContinue
 if (-not $pythonCmd) {
   # fallback to python3 if python not found
@@ -29,6 +30,7 @@ if (-not $pythonCmd) {
 Write-Host 'Creating Python virtual environment ".venv" in root'
 Start-Process -FilePath ($pythonCmd).Source -ArgumentList "-m venv ./.venv" -Wait -NoNewWindow
 
+# Set appropriate path to Python executable in the virtual environment (cross-platform)
 $venvPythonPath = "./.venv/scripts/python.exe"
 if (Test-Path -Path "/usr") {
   # fallback to Linux venv path

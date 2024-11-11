@@ -9,23 +9,27 @@ from azure.keyvault.secrets import SecretClient
 
 from data_preparation import create_or_update_search_index, upload_documents_to_index
 
-RETRY_COUNT = 5
+RETRY_COUNT = 5 # Maximum retry count for index creation or document upload failures
 
 if __name__ == "__main__":
+    # Argument parsing
     parser = argparse.ArgumentParser()
     parser.add_argument("--input_data_path", type=str, required=True)
     parser.add_argument("--config_file", type=str, required=True)
 
+    # Parse the command-line arguments
     args = parser.parse_args()
 
     with open(args.config_file) as f:
         config = json.load(f)
 
-    credential = DefaultAzureCredential()
+    credential = DefaultAzureCredential() # Use Azure Default Credential for authentication
 
+    # If config is a list, iterate over each configuration
     if type(config) is not list:
         config = [config]
     
+    # Loop through the configurations to create the index and upload documents
     for index_config in config:
         # Keyvault Secret Client
         print("Connecting to keyvault...")
@@ -43,7 +47,7 @@ if __name__ == "__main__":
         else:
             search_key_secret = secret_client.get_secret(search_key_secret_name)
             search_key = search_key_secret.value
-
+        # Retrieve the ACS service name from the config
         search_service_name = index_config.get("search_service_name")
         if not search_service_name:
             raise ValueError("No search service name provided in config file. Index will not be created.")

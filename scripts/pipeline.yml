@@ -22,7 +22,7 @@ inputs:
     mode: ro_mount
 
 jobs:
-  chunk_documents:
+  chunk_documents:  # Job for chunking documents into smaller pieces
     type: command
     component: ./chunk_documents.yml
     inputs:
@@ -33,7 +33,7 @@ jobs:
         type: uri_file
         mode: upload
 
-  embed_documents:
+  embed_documents: # Job to generate embeddings for the document chunks
     type: command
     component: ./embed_documents.yml
     inputs:
@@ -44,7 +44,7 @@ jobs:
         type: uri_file
         mode: upload
 
-  push_documents_acs:
+  push_documents_acs:  # Job to push the chunked documents with embeddings to Azure Cognitive Search
     type: command
     component: ./push_documents_acs.yml
     inputs:

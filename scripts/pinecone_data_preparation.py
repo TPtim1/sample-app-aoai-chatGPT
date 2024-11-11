@@ -58,7 +58,7 @@ def check_if_pinecone_environment_exists(
     environment: str,
     api_key: str,
     credential = None):
-    """_summary_
+    """Check if the Pinecone environment exists using the provided API key and environment name.
 
     Args:
         account_name (str): _description_
@@ -77,6 +77,7 @@ def check_if_pinecone_environment_exists(
 def create_or_update_vector_search_index(
         index_name,
         credential):
+    """Create or update the Pinecone vector search index if it doesn't exist."""
     if credential is None:
         raise ValueError("credential cannot be None")
 
@@ -103,7 +104,7 @@ def upsert_documents_to_index(
         index_name: str,
         docs: List[Document]
         ):
-    
+    """Upsert document chunks into the specified Pinecone index."""
     index = pinecone.Index(index_name)
     for document in docs:
         finalDocChunk:dict = {}
@@ -115,6 +116,7 @@ def upsert_documents_to_index(
         finalDocChunk["contentvector"] = document.contentVector
 
         try:
+            # Upsert the document into the Pinecone index
             index.upsert([(finalDocChunk["id"],finalDocChunk["contentvector"], {"title":finalDocChunk['title'], "filepath":finalDocChunk['filepath'],"url":finalDocChunk['url'],"content":finalDocChunk['content']})])
 
             print(f"Upsert doc chunk {document.id} successfully")
@@ -125,6 +127,7 @@ def upsert_documents_to_index(
 
 def validate_index(
         index_name):
+    """Validate if the Pinecone index is ready."""
     try:
         if not pinecone.describe_index(index_name).status['ready']:
             raise Exception(
@@ -135,6 +138,7 @@ def validate_index(
             f"Failed to create vector index {index_name}. Error: {str(e)}")  
 
 def create_index(config, credential, form_recognizer_client=None, embedding_model_endpoint=None, use_layout=False, njobs=4):
+    """Prepare data for Pinecone indexing: check environment, create index, chunk data, and upsert."""
     environment = config["environment"]
     api_key = config["api_key"]
     index_name = config["index_name"]
@@ -215,6 +219,7 @@ if __name__ == "__main__":
             form_recognizer_client = DocumentAnalysisClient(endpoint=f"https://{args.form_rec_resource}.cognitiveservices.azure.com/", credential=AzureKeyCredential(args.form_rec_key))
         print(f"Using Form Recognizer resource {args.form_rec_resource} for PDF cracking, with the {'Layout' if args.form_rec_use_layout else 'Read'} model.")
 
+     # Process each configuration in the Pinecone config file
     for index_config in config:        
         if index_config.get("index_name") and not args.embedding_model_endpoint:
             raise Exception("ERROR: Vector search is enabled in the config, but no embedding model endpoint and key were provided. Please provide these values or disable vector search.")
