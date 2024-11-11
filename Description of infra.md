@@ -1,3 +1,5 @@
+# Infra files Description
+contains the infrastructure deployment files to deploy in azure cloud
 # main.bicep
 
 Description: This is the main Bicep file that defines the infrastructure for deploying various Azure resources. It sets the target scope to the subscription level and includes parameters for environment configuration, resource names, and settings for services like OpenAI and Azure Search.
