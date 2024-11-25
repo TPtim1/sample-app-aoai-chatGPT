@@ -9,6 +9,7 @@ import { ChatMessage } from '../../api'
 import { AppStateContext } from '../../state/AppProvider'
 import { resizeImage } from '../../utils/resizeImage'
 
+// Defines the Props interface for the component, specifying the expected props
 interface Props {
   onSend: (question: ChatMessage['content'], id?: string) => void
   disabled: boolean
@@ -18,12 +19,15 @@ interface Props {
 }
 
 export const QuestionInput = ({ onSend, disabled, placeholder, clearOnSend, conversationId }: Props) => {
+  // State to manage the question input and base64 image
   const [question, setQuestion] = useState<string>('')
   const [base64Image, setBase64Image] = useState<string | null>(null);
 
+  // Accessing the application state context
   const appStateContext = useContext(AppStateContext)
   const OYD_ENABLED = appStateContext?.state.frontendSettings?.oyd_enabled || false;
 
+  // Handles image upload and converts the image to base64
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
 
@@ -32,6 +36,7 @@ export const QuestionInput = ({ onSend, disabled, placeholder, clearOnSend, conv
     }
   };
 
+   // Converts the uploaded image to a base64 string and resizes it
   const convertToBase64 = async (file: Blob) => {
     try {
       const resizedBase64 = await resizeImage(file, 800, 800);
@@ -41,6 +46,7 @@ export const QuestionInput = ({ onSend, disabled, placeholder, clearOnSend, conv
     }
   };
 
+  // Sends the question and optionally the image
   const sendQuestion = () => {
     if (disabled || !question.trim()) {
       return
@@ -61,6 +67,7 @@ export const QuestionInput = ({ onSend, disabled, placeholder, clearOnSend, conv
     }
   }
 
+  // Handles the Enter key press event to send the question
   const onEnterPress = (ev: React.KeyboardEvent<Element>) => {
     if (ev.key === 'Enter' && !ev.shiftKey && !(ev.nativeEvent?.isComposing === true)) {
       ev.preventDefault()
@@ -68,10 +75,12 @@ export const QuestionInput = ({ onSend, disabled, placeholder, clearOnSend, conv
     }
   }
 
+  // Updates the question state when the input field value changes
   const onQuestionChange = (_ev: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>, newValue?: string) => {
     setQuestion(newValue || '')
   }
 
+  // Determines if the send button should be disabled
   const sendQuestionDisabled = disabled || !question.trim()
 
   return (
@@ -87,6 +96,7 @@ export const QuestionInput = ({ onSend, disabled, placeholder, clearOnSend, conv
         onKeyDown={onEnterPress}
       />
       {!OYD_ENABLED && (
+        {/* File input for uploading images */}
         <div className={styles.fileInputContainer}>
           <input
             type="file"
@@ -95,7 +105,9 @@ export const QuestionInput = ({ onSend, disabled, placeholder, clearOnSend, conv
             accept="image/*"
             className={styles.fileInput}
           />
+          {/* File input label */}
           <label htmlFor="fileInput" className={styles.fileLabel} aria-label='Upload Image'>
+            {/* File input icon */}
             <FontIcon
               className={styles.fileIcon}
               iconName={'PhotoCollection'}
@@ -104,6 +116,7 @@ export const QuestionInput = ({ onSend, disabled, placeholder, clearOnSend, conv
           </label>
         </div>)}
       {base64Image && <img className={styles.uploadedImage} src={base64Image} alt="Uploaded Preview" />}
+      {/* Send button */}
       <div
         className={styles.questionInputSendButtonContainer}
         role="button"
@@ -112,6 +125,7 @@ export const QuestionInput = ({ onSend, disabled, placeholder, clearOnSend, conv
         onClick={sendQuestion}
         onKeyDown={e => (e.key === 'Enter' || e.key === ' ' ? sendQuestion() : null)}>
         {sendQuestionDisabled ? (
+          {/* Disabled send button */}
           <SendRegular className={styles.questionInputSendButtonDisabled} />
         ) : (
           <img src={Send} className={styles.questionInputSendButton} alt="Send Button" />

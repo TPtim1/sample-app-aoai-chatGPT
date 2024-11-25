@@ -39,13 +39,16 @@ import { ChatHistoryPanel } from "../../components/ChatHistory/ChatHistoryPanel"
 import { AppStateContext } from "../../state/AppProvider";
 import { useBoolean } from "@fluentui/react-hooks";
 
+// Enum for message status
 const enum messageStatus {
   NotRunning = 'Not Running',
   Processing = 'Processing',
   Done = 'Done'
 }
 
+// Chat component
 const Chat = () => {
+  // Get the app state from the context
   const appStateContext = useContext(AppStateContext)
   const ui = appStateContext?.state.frontendSettings?.ui
   const AUTH_ENABLED = appStateContext?.state.frontendSettings?.auth_enabled
@@ -66,6 +69,7 @@ const Chat = () => {
   const [logo, setLogo] = useState('')
   const [answerId, setAnswerId] = useState<string>('')
 
+  // Error dialog properties
   const errorDialogContentProps = {
     type: DialogType.close,
     title: errorMsg?.title,
@@ -73,6 +77,7 @@ const Chat = () => {
     subText: errorMsg?.subtitle
   }
 
+  // Modal properties
   const modalProps = {
     titleAriaId: 'labelId',
     subtitleAriaId: 'subTextId',
@@ -80,10 +85,13 @@ const Chat = () => {
     styles: { main: { maxWidth: 450 } }
   }
 
+  // Constants for roles and error in chat messages
   const [ASSISTANT, TOOL, ERROR] = ['assistant', 'tool', 'error']
   const NO_CONTENT_ERROR = 'No content in messages object.'
 
+  // Effect to handle error dialog display based on CosmosDB status
   useEffect(() => {
+    // Display error dialog if chat history is not enabled and CosmosDB is not working
     if (
       appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.Working &&
       appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured &&
@@ -99,6 +107,7 @@ const Chat = () => {
     }
   }, [appStateContext?.state.isCosmosDBAvailable])
 
+  // Function to handle error dialog close
   const handleErrorDialogClose = () => {
     toggleErrorDialog()
     setTimeout(() => {
@@ -106,22 +115,27 @@ const Chat = () => {
     }, 500)
   }
 
+  // Effect to set logo based on frontend settings
   useEffect(() => {
     if (!appStateContext?.state.isLoading) {
       setLogo(ui?.chat_logo || ui?.logo || Contoso)
     }
   }, [appStateContext?.state.isLoading])
 
+  // Effect to set loading state based on chat history loading state
   useEffect(() => {
     setIsLoading(appStateContext?.state.chatHistoryLoadingState === ChatHistoryLoadingState.Loading)
   }, [appStateContext?.state.chatHistoryLoadingState])
 
+  // Function to get user info list for authentication
   const getUserInfoList = async () => {
+    // Check if authentication is enabled
     if (!AUTH_ENABLED) {
       setShowAuthMessage(false)
       return
     }
     const userInfoList = await getUserInfo()
+    // Check if user info list is empty and hostname is not
     if (userInfoList.length === 0 && window.location.hostname !== '127.0.0.1') {
       setShowAuthMessage(true)
     } else {
@@ -133,15 +147,19 @@ const Chat = () => {
   let toolMessage = {} as ChatMessage
   let assistantContent = ''
 
+  // Effect to parse execution results
   useEffect(() => parseExecResults(execResults), [execResults])
 
+  // Function to parse execution results
   const parseExecResults = (exec_results_: any): void => {
     if (exec_results_ == undefined) return
     const exec_results = exec_results_.length === 2 ? exec_results_ : exec_results_.splice(2)
     appStateContext?.dispatch({ type: 'SET_ANSWER_EXEC_RESULT', payload: { answerId: answerId, exec_result: exec_results } })
   }
 
+  // Function to process result message
   const processResultMessage = (resultMessage: ChatMessage, userMessage: ChatMessage, conversationId?: string) => {
+    // Check if result message contains all_exec_results
     if (typeof resultMessage.content === "string" && resultMessage.content.includes('all_exec_results')) {
       const parsedExecResults = JSON.parse(resultMessage.content) as AzureSqlServerExecResults
       setExecResults(parsedExecResults.all_exec_results)
@@ -150,6 +168,7 @@ const Chat = () => {
       })
     }
 
+    // Check if result message contains feedback
     if (resultMessage.role === ASSISTANT) {
       setAnswerId(resultMessage.id)
       assistantContent += resultMessage.content
@@ -166,8 +185,10 @@ const Chat = () => {
       }
     }
 
+    // Check if result message contains tool message
     if (resultMessage.role === TOOL) toolMessage = resultMessage
 
+    // Check if conversation id is available
     if (!conversationId) {
       isEmpty(toolMessage)
         ? setMessages([...messages, userMessage, assistantMessage])
@@ -179,6 +200,7 @@ const Chat = () => {
     }
   }
 
+  // Function to make API request without CosmosDB
   const makeApiRequestWithoutCosmosDB = async (question: ChatMessage["content"], conversationId?: string) => {
     setIsLoading(true)
     setShowLoadingMessage(true)
@@ -306,6 +328,7 @@ const Chat = () => {
     return abortController.abort()
   }
 
+  // Function to make API request with CosmosDB
   const makeApiRequestWithCosmosDB = async (question: ChatMessage["content"], conversationId?: string) => {
     setIsLoading(true)
     setShowLoadingMessage(true)
@@ -534,6 +557,7 @@ const Chat = () => {
     return abortController.abort()
   }
 
+  // Function to make API request based on CosmosDB status and conversation id availability 
   const clearChat = async () => {
     setClearingChat(true)
     if (appStateContext?.state.currentChat?.id && appStateContext?.state.isCosmosDBAvailable.cosmosDB) {
@@ -559,6 +583,7 @@ const Chat = () => {
     setClearingChat(false)
   }
 
+  // Function to parse error message and return prettified error message 
   const tryGetRaiPrettyError = (errorMessage: string) => {
     try {
       // Using a regex to extract the JSON part that contains "innererror"
@@ -594,6 +619,7 @@ const Chat = () => {
     return errorMessage
   }
 
+  // Function to parse error message and return prettified error message 
   const parseErrorMessage = (errorMessage: string) => {
     let errorCodeMessage = errorMessage.substring(0, errorMessage.indexOf('-') + 1)
     const innerErrorCue = "{\\'error\\': {\\'message\\': "
@@ -614,6 +640,7 @@ const Chat = () => {
     return tryGetRaiPrettyError(errorMessage)
   }
 
+  // Function to handle question submit and make API request based on CosmosDB status
   const newChat = () => {
     setProcessMessages(messageStatus.Processing)
     setMessages([])
@@ -624,12 +651,14 @@ const Chat = () => {
     setProcessMessages(messageStatus.Done)
   }
 
+  // Function to stop generating answers
   const stopGenerating = () => {
     abortFuncs.current.forEach(a => a.abort())
     setShowLoadingMessage(false)
     setIsLoading(false)
   }
 
+  // Effect to scroll to the end of chat message stream on new message or loading
   useEffect(() => {
     if (appStateContext?.state.currentChat) {
       setMessages(appStateContext.state.currentChat.messages)
@@ -638,6 +667,7 @@ const Chat = () => {
     }
   }, [appStateContext?.state.currentChat])
 
+  // Effect to scroll to the end of chat message stream on new message or loading
   useLayoutEffect(() => {
     const saveToDB = async (messages: ChatMessage[], id: string) => {
       const response = await historyUpdate(messages, id)
@@ -693,29 +723,35 @@ const Chat = () => {
     }
   }, [processMessages])
 
+  // Effect to get user info list for authentication on component mount
   useEffect(() => {
     if (AUTH_ENABLED !== undefined) getUserInfoList()
   }, [AUTH_ENABLED])
 
+  // Effect to scroll to the end of chat message stream on new message or loading
   useLayoutEffect(() => {
     chatMessageStreamEnd.current?.scrollIntoView({ behavior: 'smooth' })
   }, [showLoadingMessage, processMessages])
 
+  // Function to set the active citation and opens the citation panel.
   const onShowCitation = (citation: Citation) => {
     setActiveCitation(citation)
     setIsCitationPanelOpen(true)
   }
 
+  // Function to open the intents panel
   const onShowExecResult = (answerId: string) => {
     setIsIntentsPanelOpen(true)
   }
 
+  // Function to open the URL of a citation in a new browser tab if the URL does not contain 'blob.core'
   const onViewSource = (citation: Citation) => {
     if (citation.url && !citation.url.includes('blob.core')) {
       window.open(citation.url, '_blank')
     }
   }
 
+  // Function to extract citations from a message if the message is of the 'tool' role and its content is a string.
   const parseCitationFromMessage = (message: ChatMessage) => {
     if (message?.role && message?.role === 'tool' && typeof message?.content === "string") {
       try {
@@ -728,6 +764,7 @@ const Chat = () => {
     return []
   }
 
+  // Function to extract a plot from a message if the message is of the 'tool' role and its content is a string.
   const parsePlotFromMessage = (message: ChatMessage) => {
     if (message?.role && message?.role === "tool" && typeof message?.content === "string") {
       try {
@@ -748,6 +785,7 @@ const Chat = () => {
     return null;
   }
 
+  // Function to determine whether a button should be disabled based on the current state of the application.
   const disabledButton = () => {
     return (
       isLoading ||
@@ -760,6 +798,7 @@ const Chat = () => {
   return (
     <div className={styles.container} role="main">
       {showAuthMessage ? (
+        // Display authentication message if authentication is not configured
         <Stack className={styles.chatEmptyState}>
           <ShieldLockRegular
             className={styles.chatIcon}
@@ -787,25 +826,30 @@ const Chat = () => {
           </h2>
         </Stack>
       ) : (
+        // Display chat interface if authentication is configured
         <Stack horizontal className={styles.chatRoot}>
           <div className={styles.chatContainer}>
             {!messages || messages.length < 1 ? (
+              // Display empty state if there are no messages
               <Stack className={styles.chatEmptyState}>
                 <img src={logo} className={styles.chatIcon} aria-hidden="true" />
                 <h1 className={styles.chatEmptyStateTitle}>{ui?.chat_title}</h1>
                 <h2 className={styles.chatEmptyStateSubtitle}>{ui?.chat_description}</h2>
               </Stack>
             ) : (
+              // Display chat messages
               <div className={styles.chatMessageStream} style={{ marginBottom: isLoading ? '40px' : '0px' }} role="log">
                 {messages.map((answer, index) => (
                   <>
                     {answer.role === 'user' ? (
+                      // Display user message
                       <div className={styles.chatMessageUser} tabIndex={0}>
                         <div className={styles.chatMessageUserMessage}>
                           {typeof answer.content === "string" && answer.content ? answer.content : Array.isArray(answer.content) ? <>{answer.content[0].text} <img className={styles.uploadedImageChat} src={answer.content[1].image_url.url} alt="Uploaded Preview" /></> : null}
                         </div>
                       </div>
                     ) : answer.role === 'assistant' ? (
+                      // Display assistant message
                       <div className={styles.chatMessageGpt}>
                         {typeof answer.content === "string" && <Answer
                           answer={{
@@ -821,6 +865,7 @@ const Chat = () => {
                         />}
                       </div>
                     ) : answer.role === ERROR ? (
+                      // Display error message
                       <div className={styles.chatMessageError}>
                         <Stack horizontal className={styles.chatMessageErrorContent}>
                           <ErrorCircleRegular className={styles.errorIcon} style={{ color: 'rgba(182, 52, 67, 1)' }} />
@@ -832,6 +877,7 @@ const Chat = () => {
                   </>
                 ))}
                 {showLoadingMessage && (
+                  // Display loading message
                   <>
                     <div className={styles.chatMessageGpt}>
                       <Answer
@@ -852,6 +898,7 @@ const Chat = () => {
 
             <Stack horizontal className={styles.chatInput}>
               {isLoading && messages.length > 0 && (
+                // Display stop generating button if loading and messages are available
                 <Stack
                   horizontal
                   className={styles.stopGeneratingContainer}
@@ -868,6 +915,7 @@ const Chat = () => {
               )}
               <Stack>
                 {appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured && (
+                  // Display new chat button if CosmosDB is configured
                   <CommandBarButton
                     role="button"
                     styles={{
@@ -986,6 +1034,7 @@ const Chat = () => {
               </div>
             </Stack.Item>
           )}
+          {/* Intents Panel */}
           {messages && messages.length > 0 && isIntentsPanelOpen && (
             <Stack.Item className={styles.citationPanel} tabIndex={0} role="tabpanel" aria-label="Intents Panel">
               <Stack
@@ -1003,6 +1052,7 @@ const Chat = () => {
                   onClick={() => setIsIntentsPanelOpen(false)}
                 />
               </Stack>
+              {/** Intents Panel Content */}
               <Stack horizontalAlign="space-between">
                 {appStateContext?.state?.answerExecResult[answerId]?.map((execResult: ExecResults, index) => (
                   <Stack className={styles.exectResultList} verticalAlign="space-between">

@@ -1,19 +1,23 @@
+/* Sets the layout to use flexbox, with a column direction and full height. */
 .layout {
   display: flex;
   flex-direction: column;
   height: 100%;
 }
 
+/* Sets the background color of the header. */
 .header {
   background-color: #f2f2f2;
 }
 
+/* Uses flexbox to align items to the left and center them vertically. */
 .headerContainer {
   display: flex;
   justify-content: left;
   align-items: center;
 }
 
+/* Uses flexbox to align items to the center, with a left margin and no text decoration. */
 .headerTitleContainer {
   display: flex;
   align-items: center;
@@ -21,6 +25,7 @@
   text-decoration: none;
 }
 
+/* Styles the header title with font properties, color, and alignment. */
 .headerTitle {
   font-style: normal;
   font-weight: 600;
@@ -31,12 +36,14 @@
   color: #242424;
 }
 
+/* Sets the dimensions and left margin for the header icon. */
 .headerIcon {
   height: 32px;
   width: auto;
   margin-left: 36px;
 }
 
+/* Uses flexbox to align items in a row, centered horizontally, with a right margin. */
 .shareButtonContainer {
   display: flex;
   flex-direction: row;
@@ -44,10 +51,12 @@
   margin-right: 20px;
 }
 
+/* Sets the color of the share button. */
 .shareButton {
   color: #ffffff;
 }
 
+/* Styles the text of the share button with font properties and alignment. */
 .shareButtonText {
   font-style: normal;
   font-weight: 600;
@@ -58,6 +67,7 @@
   color: #ffffff;
 }
 
+/* Styles the URL text box with font properties, color, border, and border radius. */
 .urlTextBox {
   font-style: normal;
   font-weight: 400;
@@ -68,6 +78,7 @@
   border-radius: 4px;
 }
 
+/* Uses flexbox to align items in a row, centered horizontally and vertically, with padding, background, border, and border radius. */
 .copyButtonContainer {
   box-sizing: border-box;
   display: flex;
@@ -81,15 +92,18 @@
   border-radius: 4px;
 }
 
+/*  Changes the background color and cursor on hover for the copy button container. */
 .copyButtonContainer:hover {
   cursor: pointer;
   background: #d1d1d1;
 }
 
+/* Sets the color of the copy button. */
 .copyButton {
   color: #424242;
 }
 
+/* Styles the text of the copy button with font properties and alignment. */
 .copyButtonText {
   font-style: normal;
   font-weight: 600;
@@ -100,6 +114,7 @@
   color: #242424;
 }
 
+/* Adjusts the left margin of the header title container and the header icon for smaller screens. */
 @media (max-width: 480px) {
   .headerTitleContainer {
     margin-left: 4px;

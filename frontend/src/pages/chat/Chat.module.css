@@ -1,3 +1,6 @@
+/* This file contains the styles for the Chat component */
+
+/* Sets the flexible display and routing of columns with space between elements. */
 .container {
   flex: 1;
   display: flex;
@@ -5,6 +8,7 @@
   gap: 20px;
 }
 
+/* Styles for the chat root, sets a flexible display with margins and spacing between elements. */
 .chatRoot {
   flex: 1;
   display: flex;
@@ -15,6 +19,7 @@
   gap: 5px;
 }
 
+/* Styles for the chat container */
 .chatContainer {
   flex: 1;
   display: flex;
@@ -29,6 +34,7 @@
   max-height: calc(100vh - 100px);
 }
 
+/* Styles for the chat empty state */
 .chatEmptyState {
   flex-grow: 1;
   display: flex;
@@ -37,6 +43,7 @@
   align-items: center;
 }
 
+/* Styles for the chat empty state title */
 .chatEmptyStateTitle {
   font-style: normal;
   font-weight: 700;
@@ -49,6 +56,7 @@
   margin-bottom: 0px;
 }
 
+/* Styles for the chat empty state subtitle */
 .chatEmptyStateSubtitle {
   margin-top: 20px;
   font-style: normal;
@@ -61,11 +69,13 @@
   color: #616161;
 }
 
+/* Styles for the chat icon */
 .chatIcon {
   height: 62px;
   width: auto;
 }
 
+/* Styles for the chat message stream */
 .chatMessageStream {
   flex-grow: 1;
   max-width: 1028px;
@@ -78,12 +88,14 @@
   margin-top: 24px;
 }
 
+/* Styles for the chat message */
 .chatMessageUser {
   display: flex;
   justify-content: flex-end;
   margin-bottom: 12px;
 }
 
+/* Styles for the chat message user message */
 .chatMessageUserMessage {
   position: relative;
   display: flex;
@@ -105,12 +117,14 @@
   max-width: 80%;
 }
 
+/* Styles for the chat message GPT */
 .chatMessageGpt {
   margin-bottom: 12px;
   max-width: 80%;
   display: flex;
 }
 
+/* Styles for the chat message GPT error */
 .chatMessageError {
   padding: 20px;
   border-radius: 8px;
@@ -125,6 +139,7 @@
   margin-bottom: 12px;
 }
 
+/* Styles for the chat message GPT error content */
 .chatMessageErrorContent {
   font-family: 'Segoe UI';
   font-style: normal;
@@ -137,6 +152,7 @@
   align-items: center;
 }
 
+/* Styles for the chat input */
 .chatInput {
   position: sticky;
   flex: 0 0 100px;
@@ -150,6 +166,7 @@
   margin-top: 8px;
 }
 
+/* Styles for the clear chat broom */
 .clearChatBroom {
   box-sizing: border-box;
   display: flex;
@@ -166,6 +183,7 @@
   z-index: 1;
 }
 
+/* Styles for the clear chat broom no cosmos */
 .clearChatBroomNoCosmos {
   box-sizing: border-box;
   display: flex;
@@ -182,6 +200,7 @@
   z-index: 1;
 }
 
+/* Styles for the icon for new chat */
 .newChatIcon {
   box-sizing: border-box;
   display: flex;
@@ -198,6 +217,7 @@
   z-index: 1;
 }
 
+/* Styles for stop generating container */
 .stopGeneratingContainer {
   box-sizing: border-box;
   display: flex;
@@ -215,12 +235,14 @@
   border-radius: 16px;
 }
 
+/* Styles for stop generating icon */
 .stopGeneratingIcon {
   width: 14px;
   height: 14px;
   color: #424242;
 }
 
+/* Styles for stop generating text */
 .stopGeneratingText {
   width: 103px;
   height: 20px;
@@ -236,6 +258,7 @@
   flex-grow: 0;
 }
 
+/* Styles for the citation container */
 .citationPanel {
   display: flex;
   flex-direction: column;
@@ -256,10 +279,12 @@
   max-height: calc(100vh - 100px);
 }
 
+/* Styles for the citation panel header container */
 .citationPanelHeaderContainer {
   width: 100%;
 }
 
+/* Styles for the citation panel header */
 .citationPanelHeader {
   font-style: normal;
   font-weight: 600;
@@ -271,17 +296,20 @@
   flex-grow: 0;
 }
 
+/* Styles for the citation panel dismiss */
 .citationPanelDismiss {
   width: 18px;
   height: 18px;
   color: #424242;
 }
 
+/* Styles for the citation panel dismiss on hover */
 .citationPanelDismiss:hover {
   background-color: #d1d1d1;
   cursor: pointer;
 }
 
+/* Styles for the citation panel title */
 .citationPanelTitle {
   font-style: normal;
   font-weight: 600;
@@ -292,11 +320,13 @@
   margin-bottom: 12px;
 }
 
+/* Styles for the citation panel title on hover */
 .citationPanelTitle:hover {
   text-decoration: underline;
   cursor: pointer;
 }
 
+/* Styles for the citation panel content */
 .citationPanelContent {
   font-style: normal;
   font-weight: 400;
@@ -309,6 +339,7 @@
   flex-grow: 0;
 }
 
+/* Styles for the list of execution results */
 .exectResultList {
   display: flex;
   flex-direction: column;
@@ -317,14 +348,17 @@
   margin-top: 12px;
 }
 
+/* Sets the top margin for the first element of the execution result list */
 .exectResultList:first-child {
   margin-top: 0;
 }
 
+/* Sets the bottom border for the last element of the execution result list */
 .exectResultList:last-child {
   border-bottom: none;
 }
 
+/* Styles for the execution result list item */
 .exectResultList > p {
   display: flex;
   flex-direction: row;
@@ -333,15 +367,18 @@
   margin-bottom: 16px;
 }
 
+/* Sets the font weight for span elements in the list of execution results */
 .exectResultList > span {
   font-weight: 600;
 }
 
+/* Sets the padding for links. */
 a {
   padding-left: 5px;
   padding-right: 5px;
 }
 
+/* Styles for the view source button */
 .viewSourceButton {
   font-style: normal;
   font-weight: 600;
@@ -356,11 +393,13 @@ a {
   border-radius: 4px;
 }
 
+/* Styles for the view source button on hover */
 .viewSourceButton:hover {
   text-decoration: underline;
   cursor: pointer;
 }
 
+/* Styles for uploaded images in chat */
 .uploadedImageChat {
   position: absolute;
   right: -23px;
@@ -370,6 +409,7 @@ a {
   border-radius: 4px;
 }
 
+/* Defines responsive styles for small screens, including chat input field width, icon position, and quote panel maximum width. */
 @media (max-width: 480px) {
   .chatInput {
     width: 90%;

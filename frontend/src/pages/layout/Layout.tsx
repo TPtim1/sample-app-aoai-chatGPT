@@ -8,9 +8,12 @@ import Contoso from '../../assets/Contoso.svg'
 import { HistoryButton, ShareButton } from '../../components/common/Button'
 import { AppStateContext } from '../../state/AppProvider'
 
+// Importing the styles from Layout.module.css
 import styles from './Layout.module.css'
 
+// Defining the Layout component
 const Layout = () => {
+  // Defining the state variables and their setter functions
   const [isSharePanelOpen, setIsSharePanelOpen] = useState<boolean>(false)
   const [copyClicked, setCopyClicked] = useState<boolean>(false)
   const [copyText, setCopyText] = useState<string>('Copy URL')
@@ -21,39 +24,47 @@ const Layout = () => {
   const appStateContext = useContext(AppStateContext)
   const ui = appStateContext?.state.frontendSettings?.ui
 
+  // Defining the handleShareClick function to set the isSharePanelOpen state variable to true when the share button is clicked
   const handleShareClick = () => {
     setIsSharePanelOpen(true)
   }
 
+  // Defining the handleSharePanelDismiss function to set the isSharePanelOpen state variable to false when the share panel is dismissed
   const handleSharePanelDismiss = () => {
     setIsSharePanelOpen(false)
     setCopyClicked(false)
     setCopyText('Copy URL')
   }
 
+  // Defining the handleCopyClick function to copy the URL to the clipboard when the copy button is clicked and set the copyClicked state variable to true
   const handleCopyClick = () => {
     navigator.clipboard.writeText(window.location.href)
     setCopyClicked(true)
   }
 
+  // Defining the handleHistoryClick function to toggle the chat history when the history button is clicked
   const handleHistoryClick = () => {
     appStateContext?.dispatch({ type: 'TOGGLE_CHAT_HISTORY' })
   }
 
+  // Defining the useEffect hook to set the logo state variable to the Contoso logo when the app is not loading
   useEffect(() => {
     if (!appStateContext?.state.isLoading) {
       setLogo(ui?.logo || Contoso)
     }
   }, [appStateContext?.state.isLoading])
 
+  // Defining the useEffect hook to set the copyText state variable to 'Copied URL' when the copyClicked state variable is true
   useEffect(() => {
     if (copyClicked) {
       setCopyText('Copied URL')
     }
   }, [copyClicked])
 
+  // Defining the useEffect hook to set the shareLabel state variable to 'Share' when the appStateContext.state.isCosmosDBAvailable.status is not equal to 'NotConfigured'
   useEffect(() => { }, [appStateContext?.state.isCosmosDBAvailable.status])
 
+  // Defining the useEffect hook to set the shareLabel, hideHistoryLabel, and showHistoryLabel state variables based on the window width
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 480) {
@@ -75,26 +86,33 @@ const Layout = () => {
 
   return (
     <div className={styles.layout}>
+       {/* Header section */}
       <header className={styles.header} role={'banner'}>
         <Stack horizontal verticalAlign="center" horizontalAlign="space-between">
           <Stack horizontal verticalAlign="center">
+            {/* Logo */}
             <img src={logo} className={styles.headerIcon} aria-hidden="true" alt="" />
+            {/* Title link */}
             <Link to="/" className={styles.headerTitleContainer}>
               <h1 className={styles.headerTitle}>{ui?.title}</h1>
             </Link>
           </Stack>
           <Stack horizontal tokens={{ childrenGap: 4 }} className={styles.shareButtonContainer}>
+            {/* History button */}
             {appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured && ui?.show_chat_history_button !== false && (
               <HistoryButton
                 onClick={handleHistoryClick}
                 text={appStateContext?.state?.isChatHistoryOpen ? hideHistoryLabel : showHistoryLabel}
               />
             )}
+            {/* Share button */}
             {ui?.show_share_button && <ShareButton onClick={handleShareClick} text={shareLabel} />}
           </Stack>
         </Stack>
       </header>
+      {/* Outlet for nested routes */}
       <Outlet />
+      {/* Share panel */}
       <Dialog
         onDismiss={handleSharePanelDismiss}
         hidden={!isSharePanelOpen}
@@ -119,7 +137,9 @@ const Layout = () => {
           showCloseButton: true
         }}>
         <Stack horizontal verticalAlign="center" style={{ gap: '8px' }}>
+          {/* URL text field */}
           <TextField className={styles.urlTextBox} defaultValue={window.location.href} readOnly />
+          {/* Copy button */}
           <div
             className={styles.copyButtonContainer}
             role="button"

@@ -1,3 +1,4 @@
+/* Styles the main container of the question input */
 .questionInputContainer {
   height: 120px;
   position: absolute;
@@ -12,6 +13,7 @@
   border-radius: 8px;
 }
 
+/* Styles the text area within the question input */
 .questionInputTextArea {
   width: 100%;
   line-height: 40px;
@@ -21,17 +23,20 @@
   margin-right: 12px;
 }
 
+/* : Positions the send button container absolutely within the main container */
 .questionInputSendButtonContainer {
   position: absolute;
   right: 24px;
   bottom: 20px;
 }
 
+/* Styles the send button, sets the dimensions for the send button */
 .questionInputSendButton {
   width: 24px;
   height: 23px;
 }
 
+/* Styles the send button when it is disabled */
 .questionInputSendButtonDisabled {
   /* opacity: 0.4; */
   width: 24px;
@@ -40,6 +45,7 @@
   color: #424242;
 }
 
+/* Styles the bottom border of the question input */
 .questionInputBottomBorder {
   position: absolute;
   width: 100%;
@@ -51,24 +57,28 @@
   border-bottom-right-radius: 8px;
 }
 
+/* Styles the options button with cursor, width, and height */
 .questionInputOptionsButton {
   cursor: pointer;
   width: 27px;
   height: 30px;
 }
 
+/* Adjusts the left position of the main container for smaller screens. */
 @media (max-width: 480px) {
   .questionInputContainer {
     left: 16.5%;
   }
 }
 
+/* Styles the file input container with position, right, and top */
 .fileInputContainer {
   position: absolute;
   right: 24px;
   top: 20px;
 }
 
+/* Styles the file input with width, height, opacity, overflow, position, and z-index */
 .fileInput {
   width: 0;
   height: 0;
@@ -78,6 +88,7 @@
   z-index: -1;
 }
 
+/* Styles the file label with display, border-radius, cursor, text-align, and font-size */
 .fileLabel {
   display: inline-block;
   border-radius: 5px;
@@ -86,11 +97,13 @@
   font-size: 14px;
 }
 
+/* Styles the file icon with font-size and color */
 .fileIcon {
   font-size: 20px;
   color: #424242;
 }
 
+/* Styles the file label text with margin-left and color */
 .uploadedImage {
   margin-right: 70px;
 }
